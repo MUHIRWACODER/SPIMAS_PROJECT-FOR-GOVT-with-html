@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SPIMAS - District Engineer Dashboard</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+        <h2>District Engineer Dashboard</h2>
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Citizen Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <p>Use this page to validate reports and manage work orders.</p>
+
+    <hr>
+
+    <!-- Summary Statistics (dynamically updated) -->
+    <h3>Summary Statistics</h3>
+    <ul id="statsSection">
+        <li>Total Reports: <span id="statTotal">0</span></li>
+        <li>Pending Validation: <span id="statPending">0</span></li>
+        <li>Validated: <span id="statValidated">0</span></li>
+        <li>Rejected: <span id="statRejected">0</span></li>
+    </ul>
+
+    <hr>
+
+    <!-- Reports Inbox (dynamically populated) -->
+    <h3>Reports Inbox</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>District</th>
+                <th>Severity</th>
+                <th>Description</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="reportsTableBody">
+            <!-- Dynamically populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <br>
+
+    <p><b>Note:</b> Click "Validate" to approve a report and automatically create a Work Order. Click "Reject" to dismiss a report.</p>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+
+    <script>
+        // ===== ENGINEERINGDASHBOARD.HTML JAVASCRIPT =====
+
+        // --- Default seed reports ---
+        var DEFAULT_REPORTS = [
+            {
+                id: 101,
+                category: "Pothole",
+                district: "Nyarugenge",
+                severity: 5,
+                description: "Large pothole on the main road to the market.",
+                date: "May 10, 2026",
+                status: "Pending Validation"
+            },
+            {
+                id: 102,
+                category: "Street Light",
+                district: "Gasabo",
+                severity: 2,
+                description: "The lamp post near the school is flickering.",
+                date: "May 12, 2026",
+                status: "Pending Validation"
+            }
+        ];
+
+        // --- Default seed work orders ---
+        var DEFAULT_WORK_ORDERS = [
+            {
+                orderId: "#WO-501",
+                category: "Pothole Repair",
+                location: "Nyarugenge",
+                status: "Assigned",
+                dateAssigned: "May 10, 2026",
+                reportId: null
+            },
+            {
+                orderId: "#WO-502",
+                category: "Street Light Fix",
+                location: "Gasabo",
+                status: "Started",
+                dateAssigned: "May 11, 2026",
+                reportId: null
+            },
+            {
+                orderId: "#WO-503",
+                category: "Water Pipe Repair",
+                location: "Kicukiro",
+                status: "In Progress",
+                dateAssigned: "May 12, 2026",
+                reportId: null
+            }
+        ];
+
+        // --- Load reports from localStorage ---
+        function loadReports() {
+            var stored = localStorage.getItem('spimas_reports');
+            if (stored) {
+                return JSON.parse(stored);
+            } else {
+                localStorage.setItem('spimas_reports', JSON.stringify(DEFAULT_REPORTS));
+                return JSON.parse(JSON.stringify(DEFAULT_REPORTS));
+            }
+        }
+
+        // --- Save reports to localStorage ---
+        function saveReports(reports) {
+            localStorage.setItem('spimas_reports', JSON.stringify(reports));
+        }
+
+        // --- Load work orders from localStorage ---
+        function loadWorkOrders() {
+            var stored = localStorage.getItem('spimas_work_orders');
+            if (stored) {
+                return JSON.parse(stored);
+            } else {
+                localStorage.setItem('spimas_work_orders', JSON.stringify(DEFAULT_WORK_ORDERS));
+                return JSON.parse(JSON.stringify(DEFAULT_WORK_ORDERS));
+            }
+        }
+
+        // --- Save work orders to localStorage ---
+        function saveWorkOrders(orders) {
+            localStorage.setItem('spimas_work_orders', JSON.stringify(orders));
+        }
+
+        // --- Get next Work Order ID ---
+        function getNextWorkOrderId() {
+            var orders = loadWorkOrders();
+            var maxNum = 503; // Minimum starting number
+            for (var i = 0; i < orders.length; i++) {
+                var num = parseInt(orders[i].orderId.replace('#WO-', ''));
+                if (num > maxNum) {
+                    maxNum = num;
+                }
+            }
+            return '#WO-' + (maxNum + 1);
+        }
+
+        // --- Get severity label ---
+        function getSeverityLabel(severity) {
+            if (severity >= 4) return 'Critical';
+            if (severity === 3) return 'Moderate';
+            return 'Minor';
+        }
+
+        // --- Get CSS class for status ---
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Pending Validation': return 'status-pending';
+                case 'Validated': return 'status-validated';
+                case 'Rejected': return 'status-rejected';
+                default: return '';
+            }
+        }
+
+        // --- Render the reports table ---
+        function renderReportsTable() {
+            var reports = loadReports();
+            var tbody = document.getElementById('reportsTableBody');
+            tbody.innerHTML = '';
+
+            if (reports.length === 0) {
+                var emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = '<td colspan="8" style="text-align:center; padding:20px;">No reports found.</td>';
+                tbody.appendChild(emptyRow);
+                updateStats(reports);
+                return;
+            }
+
+            for (var i = 0; i < reports.length; i++) {
+                var report = reports[i];
+                var row = document.createElement('tr');
+
+                var severityText = typeof report.severity === 'number' 
+                    ? getSeverityLabel(report.severity) + ' (' + report.severity + ')' 
+                    : report.severity;
+
+                row.innerHTML = 
+                    '<td>' + report.id + '</td>' +
+                    '<td>' + report.category + '</td>' +
+                    '<td>' + (report.district || 'N/A') + '</td>' +
+                    '<td>' + severityText + '</td>' +
+                    '<td>' + report.description + '</td>' +
+                    '<td>' + report.date + '</td>' +
+                    '<td><span class="' + getStatusClass(report.status) + '">' + report.status + '</span></td>' +
+                    '<td id="actions-' + report.id + '"></td>';
+
+                tbody.appendChild(row);
+
+                // Add action buttons only for "Pending Validation" reports
+                var actionsCell = document.getElementById('actions-' + report.id);
+                if (report.status === 'Pending Validation') {
+                    var validateBtn = document.createElement('button');
+                    validateBtn.textContent = 'Validate';
+                    validateBtn.className = 'btn-validate';
+                    validateBtn.setAttribute('data-report-id', report.id);
+                    validateBtn.addEventListener('click', function() {
+                        validateReport(parseInt(this.getAttribute('data-report-id')));
+                    });
+
+                    var rejectBtn = document.createElement('button');
+                    rejectBtn.textContent = 'Reject';
+                    rejectBtn.className = 'btn-reject';
+                    rejectBtn.style.marginLeft = '5px';
+                    rejectBtn.setAttribute('data-report-id', report.id);
+                    rejectBtn.addEventListener('click', function() {
+                        rejectReport(parseInt(this.getAttribute('data-report-id')));
+                    });
+
+                    actionsCell.appendChild(validateBtn);
+                    actionsCell.appendChild(rejectBtn);
+                } else {
+                    actionsCell.textContent = '—';
+                }
+            }
+
+            updateStats(reports);
+        }
+
+        // --- Update summary statistics ---
+        function updateStats(reports) {
+            var total = reports.length;
+            var pending = 0;
+            var validated = 0;
+            var rejected = 0;
+
+            for (var i = 0; i < reports.length; i++) {
+                switch (reports[i].status) {
+                    case 'Pending Validation': pending++; break;
+                    case 'Validated': validated++; break;
+                    case 'Rejected': rejected++; break;
+                }
+            }
+
+            document.getElementById('statTotal').textContent = total;
+            document.getElementById('statPending').textContent = pending;
+            document.getElementById('statValidated').textContent = validated;
+            document.getElementById('statRejected').textContent = rejected;
+        }
+
+        // --- Validate a report ---
+        function validateReport(reportId) {
+            var reports = loadReports();
+            var report = null;
+
+            for (var i = 0; i < reports.length; i++) {
+                if (reports[i].id === reportId) {
+                    reports[i].status = 'Validated';
+                    report = reports[i];
+                    break;
+                }
+            }
+
+            if (!report) {
+                alert('Report not found.');
+                return;
+            }
+
+            saveReports(reports);
+
+            // Create a matching Work Order
+            var orders = loadWorkOrders();
+            var newOrderId = getNextWorkOrderId();
+
+            var now = new Date();
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var dateStr = months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+            var newOrder = {
+                orderId: newOrderId,
+                category: report.category,
+                location: report.district || 'Unknown',
+                status: "Assigned",
+                dateAssigned: dateStr,
+                reportId: reportId
+            };
+
+            orders.push(newOrder);
+            saveWorkOrders(orders);
+
+            alert('Report #' + reportId + ' validated!\nWork Order ' + newOrderId + ' created and assigned.');
+            renderReportsTable();
+        }
+
+        // --- Reject a report ---
+        function rejectReport(reportId) {
+            var reports = loadReports();
+
+            for (var i = 0; i < reports.length; i++) {
+                if (reports[i].id === reportId) {
+                    reports[i].status = 'Rejected';
+                    break;
+                }
+            }
+
+            saveReports(reports);
+            alert('Report #' + reportId + ' has been rejected.');
+            renderReportsTable();
+        }
+
+        // --- Initialize ---
+        loadWorkOrders(); // Ensure default work orders are seeded
+        renderReportsTable();
+    </script>
+
+</body>
+</html>

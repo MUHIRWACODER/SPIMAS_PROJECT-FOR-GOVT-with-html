@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SPIMAS - Citizen Portal</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS - Citizen Portal</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <hr>
+
+    <!-- Greeting Banner (shows if logged in) -->
+    <div id="greetingBanner"></div>
+
+    <!-- Section 1: Detailed Login -->
+    <section>
+        <h2>Account Login</h2>
+        <form id="citizenLoginForm">
+            <label>Full Name</label>
+            <input type="text" name="name" id="citizenName" placeholder="Andika amazina yawe" required><br><br>
+
+            <label>National ID:</label>
+            <input type="number" name="id" id="citizenId" placeholder="Shyiramo umubare w' irangamuntu"><br><br>
+
+            <label>E-mail</label>
+            <input type="email" name="email" id="citizenEmail" placeholder="Andika imeyili yawe" required><br><br>
+
+            <label>Enter your password</label>
+            <input type="password" name="pw" id="citizenPassword" placeholder="Shyiramo ijambo banga" required><br><br>
+
+            <button type="submit">Login to Portal</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <!-- Section 2: Reporting Form -->
+    <section>
+        <h2>Report an Issue</h2>
+        <form id="reportForm">
+            <label>What is the issue?</label><br>
+            <input type="text" id="reportIssue" placeholder="e.g. Broken Water Pipe" required><br><br>
+
+            <label>Location (District):</label><br>
+            <input type="text" id="reportDistrict" placeholder="Shyiramo akarere utuyemo" required><br><br>
+
+            <label>Severity (1 to 5):</label><br>
+            <input type="number" id="reportSeverity" min="1" max="5" placeholder="Sobanura uburyo ki ikibazo giteye ukoresheje imibare" required><br><br>
+
+            <label>Describe the problem:</label><br>
+            <textarea id="reportDescription" rows="4" cols="30" placeholder="Sobanura uburyo ki ikibazo giteye mu magambo" required></textarea><br><br>
+
+            <button type="submit">Submit Report</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <!-- Section 3: Active Projects -->
+    <section>
+        <h2>Active Projects</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Budget (RWF)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Kigali Ring Road</td>
+                    <td>12.4 Billion</td>
+                    <td>On Track</td>
+                </tr>
+                <tr>
+                    <td>Bugesera Water</td>
+                    <td>5.8 Billion</td>
+                    <td>Delayed</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+
+    <script>
+        // ===== CITIZEN.HTML JAVASCRIPT =====
+
+        // --- Default seed reports (used if localStorage is empty) ---
+        var DEFAULT_REPORTS = [
+            {
+                id: 101,
+                category: "Pothole",
+                district: "Nyarugenge",
+                severity: 5,
+                description: "Large pothole on the main road to the market.",
+                date: "May 10, 2026",
+                status: "Pending Validation"
+            },
+            {
+                id: 102,
+                category: "Street Light",
+                district: "Gasabo",
+                severity: 2,
+                description: "The lamp post near the school is flickering.",
+                date: "May 12, 2026",
+                status: "Pending Validation"
+            }
+        ];
+
+        // --- Helper: Load reports from localStorage or use defaults ---
+        function loadReports() {
+            var stored = localStorage.getItem('spimas_reports');
+            if (stored) {
+                return JSON.parse(stored);
+            } else {
+                // Seed with defaults
+                localStorage.setItem('spimas_reports', JSON.stringify(DEFAULT_REPORTS));
+                return DEFAULT_REPORTS;
+            }
+        }
+
+        // --- Helper: Save reports to localStorage ---
+        function saveReports(reports) {
+            localStorage.setItem('spimas_reports', JSON.stringify(reports));
+        }
+
+        // --- Helper: Get next report ID ---
+        function getNextReportId() {
+            var reports = loadReports();
+            if (reports.length === 0) return 103;
+            var maxId = 102; // Minimum starting ID
+            for (var i = 0; i < reports.length; i++) {
+                if (reports[i].id > maxId) {
+                    maxId = reports[i].id;
+                }
+            }
+            return maxId + 1;
+        }
+
+        // --- Show greeting if user is logged in ---
+        function showGreeting() {
+            var userName = localStorage.getItem('spimas_user_name');
+            var banner = document.getElementById('greetingBanner');
+            if (userName) {
+                banner.className = 'greeting-banner';
+                banner.textContent = 'Welcome, ' + userName + '! You are logged in.';
+            } else {
+                banner.className = '';
+                banner.textContent = '';
+            }
+        }
+
+        // --- Citizen Login Form ---
+        document.getElementById('citizenLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var name = document.getElementById('citizenName').value.trim();
+            var email = document.getElementById('citizenEmail').value.trim();
+
+            if (name && email) {
+                localStorage.setItem('spimas_user_name', name);
+                localStorage.setItem('spimas_user_email', email);
+                alert('Login successful! Welcome, ' + name);
+                showGreeting();
+                this.reset();
+            }
+        });
+
+        // --- Report an Issue Form ---
+        document.getElementById('reportForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var issue = document.getElementById('reportIssue').value.trim();
+            var district = document.getElementById('reportDistrict').value.trim();
+            var severity = parseInt(document.getElementById('reportSeverity').value);
+            var description = document.getElementById('reportDescription').value.trim();
+
+            if (!issue || !district || !severity || !description) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            if (severity < 1 || severity > 5) {
+                alert('Severity must be between 1 and 5.');
+                return;
+            }
+
+            var reports = loadReports();
+            var newId = getNextReportId();
+
+            // Format current date nicely
+            var now = new Date();
+            var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            var dateStr = months[now.getMonth()] + ' ' + now.getDate() + ', ' + now.getFullYear();
+
+            var newReport = {
+                id: newId,
+                category: issue,
+                district: district,
+                severity: severity,
+                description: description,
+                date: dateStr,
+                status: "Pending Validation"
+            };
+
+            reports.push(newReport);
+            saveReports(reports);
+
+            alert('Report #' + newId + ' submitted successfully!\nStatus: Pending Validation');
+            this.reset();
+        });
+
+        // --- Initialize ---
+        loadReports(); // Ensure defaults are seeded
+        showGreeting();
+    </script>
+
+</body>
+</html>

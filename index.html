@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SPIMAS - Home Page</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+
+        <!-- Navigation -->
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Citizen Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <hr>
+
+    <!-- Greeting Banner (shows if logged in) -->
+    <div id="greetingBanner"></div>
+
+    <!-- Welcome Section -->
+    <section>
+        <h2>Welcome to SPIMAS</h2>
+        <p>Every Rwandan citizen deserves to know where public funds go.</p>
+        <p>Use this system to monitor roads, bridges, schools, and hospitals.</p>
+        <a href="citizen.html"><b>Click Here to Access Citizen Portal</b></a>
+    </section>
+
+    <!-- Goals Section -->
+    <section>
+        <h2>Our Goals</h2>
+        <ul>
+            <li><strong>Transparency:</strong> Making budgets visible.</li>
+            <li><strong>Accountability:</strong> Holding officials responsible.</li>
+            <li><strong>Monitoring:</strong> Real-time tracking of projects.</li>
+        </ul>
+    </section>
+
+    <hr>
+
+    <!-- Simple Login Form -->
+    <section>
+        <h2>Quick Login</h2>
+        <form id="quickLoginForm">
+            <label>Email Address:</label><br>
+            <input type="email" id="loginEmail" placeholder="you@example.rw" required><br><br>
+
+            <label>Password:</label><br>
+            <input type="password" id="loginPassword" required><br><br>
+
+            <button type="submit">LOG IN</button>
+        </form>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+
+    <script>
+        // ===== INDEX.HTML JAVASCRIPT =====
+
+        // Show greeting if user is logged in
+        function showGreeting() {
+            var userName = localStorage.getItem('spimas_user_name');
+            var banner = document.getElementById('greetingBanner');
+            if (userName) {
+                banner.className = 'greeting-banner';
+                banner.textContent = 'Welcome back, ' + userName + '!';
+            } else {
+                banner.className = '';
+                banner.textContent = '';
+            }
+        }
+
+        // Quick Login - stores email as identifier
+        document.getElementById('quickLoginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var email = document.getElementById('loginEmail').value.trim();
+            if (email) {
+                // Extract name from email (before the @) as display name
+                var displayName = email.split('@')[0];
+                // Capitalize first letter
+                displayName = displayName.charAt(0).toUpperCase() + displayName.slice(1);
+                localStorage.setItem('spimas_user_name', displayName);
+                localStorage.setItem('spimas_user_email', email);
+                alert('Login successful! Welcome, ' + displayName);
+                showGreeting();
+                document.getElementById('quickLoginForm').reset();
+            }
+        });
+
+        // Initialize on page load
+        showGreeting();
+    </script>
+
+</body>
+</html>

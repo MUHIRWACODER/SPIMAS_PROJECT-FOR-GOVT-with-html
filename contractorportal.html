@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Contractor Portal - SPIMAS</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+        <h2>Contractor Portal</h2>
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Citizen Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <p>Manage assigned work orders and update repair status.</p>
+
+    <hr>
+
+    <!-- Work Order Statistics (dynamically updated) -->
+    <h3>Work Order Statistics</h3>
+    <ul id="woStatsSection">
+        <li><b>Total Work Orders:</b> <span id="woStatTotal">0</span></li>
+        <li><b>Assigned:</b> <span id="woStatAssigned">0</span></li>
+        <li><b>Started:</b> <span id="woStatStarted">0</span></li>
+        <li><b>In Progress:</b> <span id="woStatInProgress">0</span></li>
+        <li><b>Completed:</b> <span id="woStatCompleted">0</span></li>
+    </ul>
+
+    <hr>
+
+    <!-- Active Work Orders (dynamically populated) -->
+    <h3>Active Work Orders</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Category</th>
+                <th>Location (District)</th>
+                <th>Current Status</th>
+                <th>Date Assigned</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="workOrdersTableBody">
+            <!-- Dynamically populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <br>
+
+    <hr>
+
+    <!-- Submit Completion Evidence -->
+    <h3>Submit Completion Evidence</h3>
+    <form id="evidenceForm">
+        <label>Work Order ID:</label><br>
+        <input type="text" id="evidenceOrderId" name="order_id" placeholder="e.g. 501" required><br><br>
+        
+        <label>Upload Photo of Finished Work:</label><br>
+        <input type="file" name="evidence_photo"><br><br>
+        
+        <label>Additional Notes:</label><br>
+        <textarea id="evidenceNotes" name="notes" rows="4" cols="30"></textarea><br><br>
+        
+        <input type="submit" value="Submit Evidence">
+    </form>
+
+    <br>
+    <p><a href="engineeringdashboard.html">Switch to Engineer Dashboard</a></p>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+
+    <script>
+        // ===== CONTRACTORPORTAL.HTML JAVASCRIPT =====
+
+        // --- Default seed work orders ---
+        var DEFAULT_WORK_ORDERS = [
+            {
+                orderId: "#WO-501",
+                category: "Pothole Repair",
+                location: "Nyarugenge",
+                status: "Assigned",
+                dateAssigned: "May 10, 2026",
+                reportId: null
+            },
+            {
+                orderId: "#WO-502",
+                category: "Street Light Fix",
+                location: "Gasabo",
+                status: "Started",
+                dateAssigned: "May 11, 2026",
+                reportId: null
+            },
+            {
+                orderId: "#WO-503",
+                category: "Water Pipe Repair",
+                location: "Kicukiro",
+                status: "In Progress",
+                dateAssigned: "May 12, 2026",
+                reportId: null
+            }
+        ];
+
+        // --- Load work orders from localStorage ---
+        function loadWorkOrders() {
+            var stored = localStorage.getItem('spimas_work_orders');
+            if (stored) {
+                return JSON.parse(stored);
+            } else {
+                localStorage.setItem('spimas_work_orders', JSON.stringify(DEFAULT_WORK_ORDERS));
+                return JSON.parse(JSON.stringify(DEFAULT_WORK_ORDERS));
+            }
+        }
+
+        // --- Save work orders to localStorage ---
+        function saveWorkOrders(orders) {
+            localStorage.setItem('spimas_work_orders', JSON.stringify(orders));
+        }
+
+        // --- Get CSS class for status ---
+        function getStatusClass(status) {
+            switch (status) {
+                case 'Assigned':    return 'status-assigned';
+                case 'Started':     return 'status-started';
+                case 'In Progress': return 'status-inprogress';
+                case 'Completed':   return 'status-completed';
+                default:            return '';
+            }
+        }
+
+        // --- Get action button config for a status ---
+        function getActionConfig(status) {
+            switch (status) {
+                case 'Assigned':
+                    return { label: 'Start Work', nextStatus: 'Started', className: 'btn-start' };
+                case 'Started':
+                    return { label: 'Move to In Progress', nextStatus: 'In Progress', className: 'btn-progress' };
+                case 'In Progress':
+                    return { label: 'Mark as Complete', nextStatus: 'Completed', className: 'btn-complete' };
+                default:
+                    return null;
+            }
+        }
+
+        // --- Render the work orders table ---
+        function renderWorkOrdersTable() {
+            var orders = loadWorkOrders();
+            var tbody = document.getElementById('workOrdersTableBody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                var emptyRow = document.createElement('tr');
+                emptyRow.innerHTML = '<td colspan="6" style="text-align:center; padding:20px;">No work orders found.</td>';
+                tbody.appendChild(emptyRow);
+                updateWOStats(orders);
+                return;
+            }
+
+            for (var i = 0; i < orders.length; i++) {
+                var order = orders[i];
+                var row = document.createElement('tr');
+
+                row.innerHTML = 
+                    '<td>' + order.orderId + '</td>' +
+                    '<td>' + order.category + '</td>' +
+                    '<td>' + order.location + '</td>' +
+                    '<td><span class="' + getStatusClass(order.status) + '">' + order.status + '</span></td>' +
+                    '<td>' + order.dateAssigned + '</td>' +
+                    '<td id="wo-actions-' + order.orderId.replace('#', '').replace('-', '') + '"></td>';
+
+                tbody.appendChild(row);
+
+                // Add action button based on current status
+                var actionConfig = getActionConfig(order.status);
+                var actionsCell = document.getElementById('wo-actions-' + order.orderId.replace('#', '').replace('-', ''));
+
+                if (actionConfig) {
+                    var btn = document.createElement('button');
+                    btn.textContent = actionConfig.label;
+                    btn.className = actionConfig.className;
+                    btn.setAttribute('data-order-id', order.orderId);
+                    btn.setAttribute('data-next-status', actionConfig.nextStatus);
+                    btn.addEventListener('click', function() {
+                        var orderId = this.getAttribute('data-order-id');
+                        var nextStatus = this.getAttribute('data-next-status');
+                        transitionStatus(orderId, nextStatus);
+                    });
+                    actionsCell.appendChild(btn);
+                } else {
+                    actionsCell.innerHTML = '<span style="color: #27ae60; font-weight: bold;">✔ Done</span>';
+                }
+            }
+
+            updateWOStats(orders);
+        }
+
+        // --- Transition a work order to the next status ---
+        function transitionStatus(orderId, newStatus) {
+            var orders = loadWorkOrders();
+
+            for (var i = 0; i < orders.length; i++) {
+                if (orders[i].orderId === orderId) {
+                    orders[i].status = newStatus;
+                    break;
+                }
+            }
+
+            saveWorkOrders(orders);
+            alert('Work Order ' + orderId + ' status updated to: ' + newStatus);
+            renderWorkOrdersTable();
+        }
+
+        // --- Update Work Order Statistics ---
+        function updateWOStats(orders) {
+            var total = orders.length;
+            var assigned = 0;
+            var started = 0;
+            var inProgress = 0;
+            var completed = 0;
+
+            for (var i = 0; i < orders.length; i++) {
+                switch (orders[i].status) {
+                    case 'Assigned':    assigned++; break;
+                    case 'Started':     started++; break;
+                    case 'In Progress': inProgress++; break;
+                    case 'Completed':   completed++; break;
+                }
+            }
+
+            document.getElementById('woStatTotal').textContent = total;
+            document.getElementById('woStatAssigned').textContent = assigned;
+            document.getElementById('woStatStarted').textContent = started;
+            document.getElementById('woStatInProgress').textContent = inProgress;
+            document.getElementById('woStatCompleted').textContent = completed;
+        }
+
+        // --- Submit Completion Evidence Form ---
+        document.getElementById('evidenceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var orderIdInput = document.getElementById('evidenceOrderId').value.trim();
+            var notes = document.getElementById('evidenceNotes').value.trim();
+
+            if (!orderIdInput) {
+                alert('Please enter a Work Order ID.');
+                return;
+            }
+
+            // Normalize the input: accept "501", "WO-501", or "#WO-501"
+            var normalizedId = orderIdInput;
+            if (!normalizedId.startsWith('#WO-')) {
+                if (normalizedId.startsWith('WO-')) {
+                    normalizedId = '#' + normalizedId;
+                } else {
+                    normalizedId = '#WO-' + normalizedId;
+                }
+            }
+
+            var orders = loadWorkOrders();
+            var found = false;
+
+            for (var i = 0; i < orders.length; i++) {
+                if (orders[i].orderId === normalizedId) {
+                    if (orders[i].status === 'Completed') {
+                        alert('Work Order ' + normalizedId + ' is already marked as Completed.');
+                        return;
+                    }
+                    orders[i].status = 'Completed';
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                alert('Work Order ' + normalizedId + ' not found. Please check the ID and try again.');
+                return;
+            }
+
+            saveWorkOrders(orders);
+            alert('Evidence submitted! Work Order ' + normalizedId + ' has been marked as Completed.');
+            this.reset();
+            renderWorkOrdersTable();
+        });
+
+        // --- Initialize ---
+        renderWorkOrdersTable();
+    </script>
+
+</body>
+</html>
