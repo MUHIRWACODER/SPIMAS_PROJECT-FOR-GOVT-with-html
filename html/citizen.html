@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SPIMAS - Citizen Portal</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS - Citizen Portal</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <hr>
+
+    <!-- Greeting Banner (shows if logged in) -->
+    <div id="greetingBanner"></div>
+
+    <!-- Section 1: Detailed Login -->
+    <section>
+        <h2>Account Login</h2>
+        <form id="citizenLoginForm">
+            <label>Full Name</label>
+            <input type="text" name="name" id="citizenName" placeholder="Andika amazina yawe" required><br><br>
+
+            <label>National ID:</label>
+            <input type="number" name="id" id="citizenId" placeholder="Shyiramo umubare w' irangamuntu"><br><br>
+
+            <label>E-mail</label>
+            <input type="email" name="email" id="citizenEmail" placeholder="Andika imeyili yawe" required><br><br>
+
+            <label>Enter your password</label>
+            <input type="password" name="pw" id="citizenPassword" placeholder="Shyiramo ijambo banga" required><br><br>
+
+            <button type="submit">Login to Portal</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <!-- Section 2: Reporting Form -->
+    <section>
+        <h2>Report an Issue</h2>
+        <form id="reportForm">
+            <label>What is the issue?</label><br>
+            <input type="text" id="reportIssue" placeholder="e.g. Broken Water Pipe" required><br><br>
+
+            <label>Location (District):</label><br>
+            <input type="text" id="reportDistrict" placeholder="Shyiramo akarere utuyemo" required><br><br>
+
+            <label>Severity (1 to 5):</label><br>
+            <input type="number" id="reportSeverity" min="1" max="5" placeholder="Sobanura uburyo ki ikibazo giteye ukoresheje imibare" required><br><br>
+
+            <label>Describe the problem:</label><br>
+            <textarea id="reportDescription" rows="4" cols="30" placeholder="Sobanura uburyo ki ikibazo giteye mu magambo" required></textarea><br><br>
+
+            <label>Upload image evidence:</label><br>
+            <input type="file" id="reportImage" accept="image/*" capture="environment"><br>
+            <small>Use a clear photo of the issue. On phones, this can open the camera.</small><br>
+            <img id="reportImagePreview" class="image-preview" alt="Selected issue preview"><br><br>
+
+            <label>Issue GPS location:</label><br>
+            <div class="location-tools">
+                <button type="button" id="captureLocationBtn">Capture Current Location</button>
+                <span id="locationStatus">No GPS location captured yet.</span>
+            </div>
+            <input type="text" id="reportLatitude" placeholder="Latitude" readonly><br>
+            <input type="text" id="reportLongitude" placeholder="Longitude" readonly><br>
+            <small>Capture this while standing at the issue location for best accuracy.</small><br><br>
+
+            <button type="submit">Submit Report</button>
+        </form>
+    </section>
+
+    <hr>
+
+    <!-- Section 3: Active Projects -->
+    <section>
+        <h2>Active Projects</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>Project Name</th>
+                    <th>Budget (RWF)</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Kigali Ring Road</td>
+                    <td>12.4 Billion</td>
+                    <td>On Track</td>
+                </tr>
+                <tr>
+                    <td>Bugesera Water</td>
+                    <td>5.8 Billion</td>
+                    <td>Delayed</td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+    <script src="../js/usejavascript.js"></script>
+
+</body>
+</html>

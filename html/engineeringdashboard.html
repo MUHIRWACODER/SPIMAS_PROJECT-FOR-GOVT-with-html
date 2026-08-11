@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>SPIMAS - District Engineer Dashboard</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+        <h2>District Engineer Dashboard</h2>
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Citizen Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <p>Use this page to validate reports and manage work orders.</p>
+
+    <hr>
+
+    <!-- Summary Statistics (dynamically updated) -->
+    <h3>Summary Statistics</h3>
+    <ul id="statsSection">
+        <li>Total Reports: <span id="statTotal">0</span></li>
+        <li>Pending Validation: <span id="statPending">0</span></li>
+        <li>Validated: <span id="statValidated">0</span></li>
+        <li>Rejected: <span id="statRejected">0</span></li>
+    </ul>
+
+    <hr>
+
+    <!-- Reports Inbox (dynamically populated) -->
+    <h3>Reports Inbox</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Category</th>
+                <th>District</th>
+                <th>Severity</th>
+                <th>Description</th>
+                <th>Evidence</th>
+                <th>GPS Location</th>
+                <th>Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="reportsTableBody">
+            <!-- Dynamically populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <br>
+
+    <p><b>Note:</b> Click "Validate" to approve a report and automatically create a Work Order. Click "Reject" to dismiss a report.</p>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+    <script src="../js/usejavascript.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Contractor Portal - SPIMAS</title>
+    <link rel="stylesheet" href="../css/spamis_styling.css">
+</head>
+<body>
+
+    <header>
+        <h1>SPIMAS</h1>
+        <p>Smart Public Infrastructure Monitoring &amp; Accountability System</p>
+        <h2>Contractor Portal</h2>
+        <nav>
+            <a href="index.html">Home</a> | 
+            <a href="citizen.html">Citizen Portal</a> |
+            <a href="https://www.minecofin.gov.rw" target="_blank">MINECOFIN Site</a> |
+            <a href="engineeringdashboard.html">Engineer Dashboard</a> |
+            <a href="contractorportal.html">Contractor Portal</a>
+        </nav>
+    </header>
+
+    <p>Manage assigned work orders and update repair status.</p>
+
+    <hr>
+
+    <!-- Work Order Statistics (dynamically updated) -->
+    <h3>Work Order Statistics</h3>
+    <ul id="woStatsSection">
+        <li><b>Total Work Orders:</b> <span id="woStatTotal">0</span></li>
+        <li><b>Assigned:</b> <span id="woStatAssigned">0</span></li>
+        <li><b>Started:</b> <span id="woStatStarted">0</span></li>
+        <li><b>In Progress:</b> <span id="woStatInProgress">0</span></li>
+        <li><b>Completed:</b> <span id="woStatCompleted">0</span></li>
+    </ul>
+
+    <hr>
+
+    <!-- Active Work Orders (dynamically populated) -->
+    <h3>Active Work Orders</h3>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Category</th>
+                <th>Location (District)</th>
+                <th>GPS Location</th>
+                <th>Current Status</th>
+                <th>Date Assigned</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="workOrdersTableBody">
+            <!-- Dynamically populated by JavaScript -->
+        </tbody>
+    </table>
+
+    <br>
+
+    <hr>
+
+    <!-- Submit Completion Evidence -->
+    <h3>Submit Completion Evidence</h3>
+    <form id="evidenceForm">
+        <label>Work Order ID:</label><br>
+        <input type="text" id="evidenceOrderId" name="order_id" placeholder="e.g. 501" required><br><br>
+        
+        <label>Upload Photo of Finished Work:</label><br>
+        <input type="file" name="evidence_photo"><br><br>
+        
+        <label>Additional Notes:</label><br>
+        <textarea id="evidenceNotes" name="notes" rows="4" cols="30"></textarea><br><br>
+        
+        <input type="submit" value="Submit Evidence">
+    </form>
+
+    <br>
+    <p><a href="engineeringdashboard.html">Switch to Engineer Dashboard</a></p>
+
+    <!-- Footer Section -->
+    <footer>
+        <p>Contact us: info@spimas.gov.rw</p>
+        <p>Hotline: +250 791980831</p>
+        <p>&copy; 2026 Government of Rwanda in partnership with Jules Co.</p>
+    </footer>
+    <script src="../js/usejavascript.js"></script>
+
+</body>
+</html>
